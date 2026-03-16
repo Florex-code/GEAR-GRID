@@ -1,0 +1,95 @@
+export const cars = [
+  {
+    id: 1,
+    make: 'BMW',
+    model: 'M3',
+    year: 2023,
+    trim: 'Competition',
+    price: 84999,
+    mileage: 12500,
+    fuelType: 'Gasoline',
+    transmission: 'Automatic',
+    color: '#0066b1',
+    featured: true,
+    description: 'Immaculate condition BMW M3 Competition with all options. Ceramic brakes, carbon fiber trim, executive package.',
+    features: ['Carbon Ceramic Brakes', 'Executive Package', 'Carbon Fiber Trim', 'Harmon Kardon Sound', 'Heads Up Display', 'Wireless Charging']
+  },
+  {
+    id: 2,
+    make: 'Porsche',
+    model: '911',
+    year: 2022,
+    trim: 'Carrera S',
+    price: 135000,
+    mileage: 8500,
+    fuelType: 'Gasoline',
+    transmission: 'PDK',
+    color: '#c41230',
+    featured: true,
+    description: 'Stunning 911 Carrera S with Sport Package. One owner, all service records, pristine condition.',
+    features: ['Sport Package', 'Sport Exhaust', 'Power Steering Plus', '20/21" Wheels', 'BOSE Audio', 'Lane Change Assist']
+  },
+  {
+    id: 3,
+    make: 'Tesla',
+    model: 'Model S',
+    year: 2023,
+    trim: 'Plaid',
+    price: 115000,
+    mileage: 3200,
+    fuelType: 'Electric',
+    transmission: 'Automatic',
+    color: '#f4f4f4',
+    featured: true,
+    description: 'Tesla Model S Plaid with Full Self Driving. Acceleration that will take your breath away.',
+    features: ['Full Self Driving', '21" Arachnid Wheels', 'Yoke Steering', 'Premium Audio', 'Tri-Motor AWD']
+  },
+  {
+    id: 4,
+    make: 'Mercedes-Benz',
+    model: 'S-Class',
+    year: 2023,
+    trim: 'S580 4MATIC',
+    price: 125000,
+    mileage: 5600,
+    fuelType: 'Gasoline',
+    transmission: '9G-TRONIC',
+    color: '#1a1a1a',
+    featured: false,
+    description: 'The pinnacle of luxury. S-Class with every available option including rear executive seating.',
+    features: ['Executive Rear Seating', 'Burmester 4D Audio', 'AR Head-Up Display', 'E-Active Body Control']
+  },
+  {
+    id: 5,
+    make: 'Audi',
+    model: 'R8',
+    year: 2022,
+    trim: 'V10 Performance',
+    price: 165000,
+    mileage: 4200,
+    fuelType: 'Gasoline',
+    transmission: 'S tronic',
+    color: '#ffea00',
+    featured: true,
+    description: 'Final year R8 V10 Performance. Carbon fiber everywhere, dynamic steering, B&O audio.',
+    features: ['Carbon Fiber Engine Bay', 'Laser Headlights', 'B&O 3D Audio', 'Dynamic Steering', 'Carbon Ceramic Brakes']
+  },
+  {
+    id: 6,
+    make: 'Lexus',
+    model: 'LC 500',
+    year: 2023,
+    trim: 'Inspiration Series',
+    price: 105000,
+    mileage: 1800,
+    fuelType: 'Gasoline',
+    transmission: '10-Speed Auto',
+    color: '#001f3f',
+    featured: false,
+    description: 'Limited Inspiration Series LC 500. Stunning blue paintwork, white interior, Mark Levinson audio.',
+    features: ['Mark Levinson Audio', 'Limited Edition Paint', 'Alcantara Headliner', 'Carbon Fiber Roof']
+  }
+]
+
+export const getCarById = (id) => cars.find(car => car.id === parseInt(id))
+export const getFeaturedCars = () => cars.filter(car => car.featured)
