@@ -1,10 +1,12 @@
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { toast } from 'react-toastify';
 
 export const AuthContext = createContext();
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const ADMIN_EMAIL = 'florexstudio.ng@gmail.com';
+const isAdminEmail = (email) => email?.toLowerCase() === ADMIN_EMAIL;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -12,52 +14,39 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [authError, setAuthError] = useState(null);
 
-  // Check for existing token on mount
   useEffect(() => {
     const token = localStorage.getItem('gearGridToken');
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        // Check if token is expired
-        if (decoded.exp * 1000 < Date.now()) {
-          localStorage.removeItem('gearGridToken');
-          setIsAuthenticated(false);
-          setUser(null);
-        } else {
-          setUser(decoded);
-          setIsAuthenticated(true);
-          // Optionally fetch fresh user data
-          fetchUserProfile(token);
-        }
-      } catch (error) {
-        console.error('Invalid token:', error);
-        localStorage.removeItem('gearGridToken');
-      }
-    }
-    setIsLoading(false);
-  }, []);
 
-  const fetchUserProfile = async (token) => {
+    if (!token) {
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await fetch(`${API_URL}/auth/profile`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(prev => ({ ...prev, ...userData }));
+      const decoded = jwtDecode(token);
+
+      if (decoded.exp * 1000 < Date.now()) {
+        localStorage.removeItem('gearGridToken');
+        setUser(null);
+        setIsAuthenticated(false);
+      } else {
+        setUser(decoded);
+        setIsAuthenticated(true);
       }
     } catch (error) {
-      console.error('Failed to fetch profile:', error);
+      console.error('Invalid token:', error);
+      localStorage.removeItem('gearGridToken');
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
   const login = async (email, password) => {
     setIsLoading(true);
     setAuthError(null);
-    
+
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: 'POST',
@@ -72,10 +61,14 @@ export const AuthProvider = ({ children }) => {
       }
 
       localStorage.setItem('gearGridToken', data.token);
+
       const decoded = jwtDecode(data.token);
-      setUser({ ...decoded, ...data.user });
+      const loggedInUser = { ...decoded, ...data.user };
+
+      setUser(loggedInUser);
       setIsAuthenticated(true);
-      toast.success(`Welcome back, ${data.user.firstName}!`);
+
+      toast.success(`Welcome back, ${data.user?.firstName || 'Admin'}!`);
       return { success: true };
     } catch (error) {
       setAuthError(error.message);
@@ -104,9 +97,13 @@ export const AuthProvider = ({ children }) => {
       }
 
       localStorage.setItem('gearGridToken', data.token);
+
       const decoded = jwtDecode(data.token);
-      setUser({ ...decoded, ...data.user });
+      const registeredUser = { ...decoded, ...data.user };
+
+      setUser(registeredUser);
       setIsAuthenticated(true);
+
       toast.success('Account created successfully!');
       return { success: true };
     } catch (error) {
@@ -122,35 +119,51 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('gearGridToken');
     setUser(null);
     setIsAuthenticated(false);
+    setAuthError(null);
     toast.info('Logged out successfully');
   }, []);
 
   const updateProfile = async (updates) => {
     const token = localStorage.getItem('gearGridToken');
+
+    if (!token) {
+      toast.error('No token found');
+      return false;
+    }
+
     try {
       const response = await fetch(`${API_URL}/auth/profile`, {
         method: 'PUT',
         headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(updates)
+        body: JSON.stringify(updates),
       });
 
-      if (response.ok) {
-        const updatedUser = await response.json();
-        setUser(prev => ({ ...prev, ...updatedUser }));
-        toast.success('Profile updated successfully');
-        return true;
+      const updatedUser = await response.json();
+
+      if (!response.ok) {
+        throw new Error(updatedUser.message || 'Failed to update profile');
       }
+
+      setUser((prev) => ({ ...prev, ...updatedUser }));
+      toast.success('Profile updated successfully');
+      return true;
     } catch (error) {
-      toast.error('Failed to update profile');
+      toast.error(error.message || 'Failed to update profile');
       return false;
     }
   };
 
+  const isAdmin =
+    user?.role === 'admin' ||
+    user?.isAdmin === true ||
+    isAdminEmail(user?.email);
+
   const value = {
     user,
+    isAdmin,
     isAuthenticated,
     isLoading,
     authError,
@@ -158,12 +171,10 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateProfile,
-    setAuthError
+    setAuthError,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+
+export const useAuth = () => useContext(AuthContext);

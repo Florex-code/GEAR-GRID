@@ -1,9 +1,12 @@
-import React, { useState, useEffect, createContext, useContext } from 'react'
+import React, { useState, useEffect} from 'react'
 import { Routes, Route, Link, useNavigate, useLocation, useParams } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useForm } from 'react-hook-form'
 import { ToastContainer, toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+import { ThemeProvider, useTheme } from './context/ThemeContext.jsx'
+import { AuthProvider, useAuth } from './context/AuthContext.jsx'
+import { CarsProvider, useCars } from './context/CarsContext.jsx'
 import { 
   FaSun, FaMoon, FaCar, FaUser, FaHeart, FaBars, 
   FaTimes, FaSearch, FaArrowRight, FaCheckCircle, FaFilter,
@@ -91,170 +94,21 @@ export const fetchCarGallery = async (make, model, year, count = 4) => {
 
 // ==================== CONTEXTS ====================
 
-const ThemeContext = createContext()
-function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark')
-  
-  useEffect(() => {
-    localStorage.setItem('theme', theme)
-    document.documentElement.setAttribute('data-theme', theme)
-  }, [theme])
-  
-  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark')
-  
-  return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  )
-}
-const useTheme = () => useContext(ThemeContext)
 
-const AuthContext = createContext()
-function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isAdmin, setIsAdmin] = useState(false)
 
-  const login = (email, password, userData) => {
-    // Check for admin login
-    const isAdminUser = email === 'admin@geargrid.com'
-    
-    const newUser = userData || { 
-      firstName: isAdminUser ? 'Admin' : email.split('@')[0],
-      lastName: '', 
-      email, 
-      id: Date.now(),
-      isAdmin: isAdminUser
-    }
-    
-    setUser(newUser)
-    setIsAuthenticated(true)
-    setIsAdmin(isAdminUser)
-    toast.success(`Welcome back, ${newUser.firstName}!`)
-  }
 
-  const register = (userData) => {
-    setUser({ ...userData, id: Date.now(), isAdmin: false })
-    setIsAuthenticated(true)
-    setIsAdmin(false)
-    toast.success(`Welcome, ${userData.firstName}! Account created successfully!`)
-  }
-
-  const logout = () => {
-    setUser(null)
-    setIsAuthenticated(false)
-    setIsAdmin(false)
-    toast.info('Logged out successfully')
-  }
-
-  return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isAdmin, login, register, logout }}>
-      {children}
-    </AuthContext.Provider>
-  )
-}
-const useAuth = () => useContext(AuthContext)
 
 // ==================== EXPANDED CAR DATA (24 CARS) ====================
 
-const initialCars = [
-  // Original 6 cars
-  { id: 1, make: 'BMW', model: 'M3', year: 2023, trim: 'Competition', price: 84999, mileage: 12500, fuelType: 'Gasoline', transmission: 'Automatic', color: '#0066b1', featured: true, description: 'Immaculate condition BMW M3 Competition with all options. Ceramic brakes, carbon fiber trim.', features: ['Carbon Ceramic Brakes', 'Executive Package', 'Carbon Fiber Trim', 'Harmon Kardon Sound'] },
-  { id: 2, make: 'Porsche', model: '911', year: 2022, trim: 'Carrera S', price: 135000, mileage: 8500, fuelType: 'Gasoline', transmission: 'PDK', color: '#c41230', featured: true, description: 'Stunning 911 Carrera S with Sport Package. One owner, all service records.', features: ['Sport Package', 'Sport Exhaust', 'BOSE Audio', 'Lane Change Assist'] },
-  { id: 3, make: 'Tesla', model: 'Model S', year: 2023, trim: 'Plaid', price: 115000, mileage: 3200, fuelType: 'Electric', transmission: 'Automatic', color: '#f4f4f4', featured: true, description: 'Tesla Model S Plaid with Full Self Driving. Acceleration that will take your breath away.', features: ['Full Self Driving', '21" Wheels', 'Yoke Steering', 'Premium Audio'] },
-  { id: 4, make: 'Mercedes', model: 'S-Class', year: 2023, trim: 'S580', price: 125000, mileage: 5600, fuelType: 'Gasoline', transmission: 'Automatic', color: '#1a1a1a', featured: false, description: 'The pinnacle of luxury. S-Class with every available option.', features: ['Executive Seating', 'Burmester Audio', 'AR Head-Up Display'] },
-  { id: 5, make: 'Audi', model: 'R8', year: 2022, trim: 'V10 Performance', price: 165000, mileage: 4200, fuelType: 'Gasoline', transmission: 'Automatic', color: '#ffea00', featured: true, description: 'Final year R8 V10 Performance. Carbon fiber everywhere.', features: ['Carbon Fiber', 'Laser Headlights', 'B&O Audio', 'Carbon Brakes'] },
-  { id: 6, make: 'Lexus', model: 'LC 500', year: 2023, trim: 'Inspiration', price: 105000, mileage: 1800, fuelType: 'Gasoline', transmission: 'Automatic', color: '#001f3f', featured: false, description: 'Limited Inspiration Series LC 500. Stunning blue paintwork.', features: ['Mark Levinson Audio', 'Limited Paint', 'Carbon Fiber Roof'] },
-  
-  // New cars added
-  { id: 7, make: 'Ferrari', model: 'F8', year: 2022, trim: 'Tributo', price: 285000, mileage: 2100, fuelType: 'Gasoline', transmission: 'Automatic', color: '#dc0000', featured: true, description: 'Ferrari F8 Tributo with racing seats and carbon fiber package. Pure Italian excellence.', features: ['Racing Seats', 'Carbon Fiber Package', 'JBL Audio', 'Lift System'] },
-  { id: 8, make: 'Lamborghini', model: 'Huracan', year: 2023, trim: 'EVO', price: 245000, mileage: 1500, fuelType: 'Gasoline', transmission: 'Automatic', color: '#87ceeb', featured: true, description: 'Stunning Huracan EVO in baby blue. Magnetic ride suspension, sport exhaust.', features: ['Magnetic Ride', 'Sport Exhaust', 'Apple CarPlay', 'Rear Camera'] },
-  { id: 9, make: 'McLaren', model: '720S', year: 2022, trim: 'Performance', price: 295000, mileage: 3200, fuelType: 'Gasoline', transmission: 'Automatic', color: '#ffa500', featured: true, description: 'McLaren 720S Performance. Dihedral doors, track telemetry, carbon ceramics.', features: ['Track Telemetry', 'Carbon Ceramics', 'Bowers & Wilkins', 'Lift System'] },
-  { id: 10, make: 'Aston Martin', model: 'DB11', year: 2023, trim: 'V8', price: 185000, mileage: 4500, fuelType: 'Gasoline', transmission: 'Automatic', color: '#2e8b57', featured: false, description: 'British elegance meets performance. DB11 V8 with Bang & Olufsen sound.', features: ['Bang & Olufsen', 'Heated Seats', '360 Camera', 'Night Vision'] },
-  { id: 11, make: 'Bentley', model: 'Continental GT', year: 2022, trim: 'W12', price: 225000, mileage: 6800, fuelType: 'Gasoline', transmission: 'Automatic', color: '#4a4a4a', featured: false, description: 'Ultimate grand tourer. W12 power with handcrafted interior.', features: ['Mulliner Package', 'Naim Audio', 'Massage Seats', 'Touring Spec'] },
-  { id: 12, make: 'Rolls-Royce', model: 'Ghost', year: 2023, trim: 'Black Badge', price: 385000, mileage: 1200, fuelType: 'Gasoline', transmission: 'Automatic', color: '#000000', featured: true, description: 'Black Badge Ghost. The pinnacle of luxury with sinister styling.', features: ['Starlight Headliner', 'Bespoke Audio', 'Rear Theatre', 'Champagne Cooler'] },
-  { id: 13, make: 'Maserati', model: 'MC20', year: 2023, trim: 'Cielo', price: 215000, mileage: 900, fuelType: 'Gasoline', transmission: 'Automatic', color: '#ffffff', featured: false, description: 'MC20 Cielo convertible. Nettuno engine with F1-derived technology.', features: ['Carbon Fiber Tub', 'Sonus Faber Audio', 'Lift System', 'Wireless Charging'] },
-  { id: 14, make: 'Jaguar', model: 'F-Type', year: 2023, trim: 'R', price: 105000, mileage: 5600, fuelType: 'Gasoline', transmission: 'Automatic', color: '#800080', featured: false, description: 'F-Type R with supercharged V8. Active exhaust and configurable dynamics.', features: ['Active Exhaust', 'Configurable Dynamics', 'Meridian Audio', 'Panoramic Roof'] },
-  { id: 15, make: 'Chevrolet', model: 'Corvette', year: 2023, trim: 'Z06', price: 115000, mileage: 7800, fuelType: 'Gasoline', transmission: 'Manual', color: '#ff4500', featured: true, description: 'C8 Z06 with Z07 package. Flat-plane crank V8 screams to 8,600 RPM.', features: ['Z07 Package', 'Carbon Wheels', 'Brembo Brakes', 'Track Camera'] },
-  { id: 16, make: 'Ford', model: 'Mustang', year: 2024, trim: 'Dark Horse', price: 75000, mileage: 1200, fuelType: 'Gasoline', transmission: 'Manual', color: '#1e90ff', featured: false, description: 'Dark Horse with Handling Package. Recaro seats and Tremec manual.', features: ['Handling Package', 'Recaro Seats', 'B&O Audio', 'Magneride'] },
-  { id: 17, make: 'Dodge', model: 'Challenger', year: 2023, trim: 'Hellcat Redeye', price: 95000, mileage: 3400, fuelType: 'Gasoline', transmission: 'Automatic', color: '#000080', featured: false, description: 'Hellcat Redeye Widebody. 797 horsepower of American muscle.', features: ['Widebody Package', 'Laguna Leather', 'Alcantara Wheel', 'Launch Control'] },
-  { id: 18, make: 'Nissan', model: 'GT-R', year: 2023, trim: 'Nismo', price: 215000, mileage: 2100, fuelType: 'Gasoline', transmission: 'Automatic', color: '#ffffff', featured: false, description: 'GT-R Nismo with carbon fiber everything. Track-ready Godzilla.', features: ['Carbon Fiber Hood', 'Recaro Seats', 'Bose Audio', 'Titanium Exhaust'] },
-  { id: 19, make: 'Toyota', model: 'Supra', year: 2023, trim: 'A91 Edition', price: 65000, mileage: 4500, fuelType: 'Gasoline', transmission: 'Automatic', color: '#ffd700', featured: false, description: 'Limited A91 Edition in Refraction Gold. B58 engine with Toyota tuning.', features: ['A91 Edition', 'JBL Audio', 'Heads-Up Display', 'Wireless CarPlay'] },
-  { id: 20, make: 'BMW', model: 'M5', year: 2023, trim: 'CS', price: 142000, mileage: 2800, fuelType: 'Gasoline', transmission: 'Automatic', color: '#50c878', featured: true, description: 'M5 CS with 627hp. Lightest and most powerful M5 ever made.', features: ['Carbon Bucket Seats', 'Gold Bronze Wheels', 'M Carbon Ceramic', 'Bowers & Wilkins'] },
-  { id: 21, make: 'Mercedes', model: 'AMG GT', year: 2023, trim: 'Black Series', price: 325000, mileage: 1500, fuelType: 'Gasoline', transmission: 'Automatic', color: '#c0c0c0', featured: true, description: 'AMG GT Black Series. Track-focused with adjustable wing.', features: ['Carbon Fiber Wing', 'Track Package', 'Burmester', 'Roll Cage'] },
-  { id: 22, make: 'Porsche', model: 'Taycan', year: 2023, trim: 'Turbo S', price: 185000, mileage: 3200, fuelType: 'Electric', transmission: 'Automatic', color: '#ff69b4', featured: false, description: 'Taycan Turbo S in Frozen Berry. 750hp electric supercar.', features: ['Performance Battery+', 'Porsche InnoDrive', 'Burmester', 'Charging Package'] },
-  { id: 23, make: 'Audi', model: 'RS e-tron GT', year: 2023, trim: 'Quattro', price: 145000, mileage: 4100, fuelType: 'Electric', transmission: 'Automatic', color: '#228b22', featured: false, description: 'RS e-tron GT with carbon fiber roof. Electric grand touring.', features: ['Carbon Roof', 'Matrix LED', 'B&O Audio', 'Air Suspension'] },
-  { id: 24, make: 'Lucid', model: 'Air', year: 2023, trim: 'Dream Edition', price: 169000, mileage: 1800, fuelType: 'Electric', transmission: 'Automatic', color: '#e6e6fa', featured: false, description: 'Air Dream Edition with 516 mile range. Tesla competitor with luxury focus.', features: ['DreamDrive Pro', 'Surreal Sound', 'Glass Canopy', 'Executive Rear'] }
-]
-
-// ==================== CARS CONTEXT FOR GLOBAL STATE ====================
-
-const CarsContext = createContext()
-
-function CarsProvider({ children }) {
-  const [cars, setCars] = useState(initialCars)
-  const [favorites, setFavorites] = useState(() => {
-    const saved = localStorage.getItem('favorites')
-    return saved ? JSON.parse(saved) : []
-  })
-
-  useEffect(() => {
-    localStorage.setItem('favorites', JSON.stringify(favorites))
-  }, [favorites])
-
-  const addCar = (newCar) => {
-    const carWithId = { ...newCar, id: Date.now(), featured: false }
-    setCars(prev => [carWithId, ...prev])
-    toast.success('Car added successfully!')
-  }
-
-  const deleteCar = (id) => {
-    setCars(prev => prev.filter(car => car.id !== id))
-    toast.success('Car deleted!')
-  }
-
-  const toggleFeatured = (id) => {
-    setCars(prev => prev.map(car => 
-      car.id === id ? { ...car, featured: !car.featured } : car
-    ))
-  }
-
-  const toggleFavorite = (carId) => {
-    setFavorites(prev => {
-      if (prev.includes(carId)) {
-        toast.info('Removed from favorites')
-        return prev.filter(id => id !== carId)
-      } else {
-        toast.success('Added to favorites!')
-        return [...prev, carId]
-      }
-    })
-  }
-
-  const isFavorite = (carId) => favorites.includes(carId)
-
-  const getFavoriteCars = () => cars.filter(car => favorites.includes(car.id))
-
-  return (
-    <CarsContext.Provider value={{ 
-      cars, 
-      addCar, 
-      deleteCar, 
-      toggleFeatured,
-      toggleFavorite,
-      isFavorite,
-      getFavoriteCars,
-      favorites 
-    }}>
-      {children}
-    </CarsContext.Provider>
-  )
-}
-
-const useCars = () => useContext(CarsContext)
 
 // ==================== COMPONENTS ====================
+
+const DEALER = {
+  name: 'GEAR-GRID Autos',
+  phone: '+2349138465408',
+  email: 'florexdemilade@gmail.com',
+  location: 'Moyosore Street, Irawo, Ikorodu Road, Lagos, Nigeria',
+}
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme()
@@ -270,7 +124,7 @@ function Navbar() {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/inventory', label: 'Inventory' },
-    { path: '/sell', label: 'Sell Car' },
+    { path: '/sell', label: 'Sell to Us' },
     { path: '/about', label: 'About' }
   ]
 
@@ -427,7 +281,7 @@ function Navbar() {
             )}
             {isAdmin && (
               <Link to="/admin" onClick={() => setMobileOpen(false)} style={{ display: 'block', padding: '1rem', color: '#ff6b35', textDecoration: 'none' }}>
-                <FaCog style={{ marginRight: '0.5rem' }} /> Admin Dashboard
+                <FaCog style={{ marginRight: '0.5rem' }} /> Dealer Admin
               </Link>
             )}
             {isAuthenticated ? (
@@ -502,7 +356,7 @@ function Footer() {
               <FaCar /> GEAR<span style={{ color: text }}>GRID</span>
             </Link>
             <p style={{ color: '#aaa', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              Your trusted premium car marketplace. Find, buy, and sell exceptional vehicles with confidence.
+              Premium dealership inventory, transparent pricing, and direct support from a local automotive team.
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
               {socialLinks.map((social) => (
@@ -551,15 +405,15 @@ function Footer() {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#aaa' }}>
               <FaMapMarkerAlt style={{ color: accent }} />
-              <span>123 Auto Drive, Motor City, MC 12345</span>
+              <span>{DEALER.location}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#aaa' }}>
               <FaPhone style={{ color: accent }} />
-              <span>+1 (555) 123-4567</span>
+              <span>{DEALER.phone}</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#aaa' }}>
               <FaEnvelope style={{ color: accent }} />
-              <span>contact@geargrid.com</span>
+              <span>{DEALER.email}</span>
             </div>
           </div>
         </div>
@@ -572,20 +426,60 @@ function Footer() {
   )
 }
 
+function MobileBottomNav() {
+  const { theme } = useTheme()
+  const { isAuthenticated, isAdmin } = useAuth()
+  const { favorites } = useCars()
+  const location = useLocation()
+
+  const bg = theme === 'dark' ? '#1a1a2e' : '#ffffff'
+  const text = theme === 'dark' ? '#ffffff' : '#1a1a2e'
+  const links = [
+    { path: '/', label: 'Home', icon: FaCar },
+    { path: '/inventory', label: 'Inventory', icon: FaSearch },
+    { path: '/sell', label: 'Sell', icon: FaPlus },
+    isAdmin
+      ? { path: '/admin', label: 'Admin', icon: FaCog }
+      : { path: isAuthenticated ? '/favorites' : '/login', label: isAuthenticated ? 'Saved' : 'Login', icon: isAuthenticated ? FaHeart : FaUser },
+  ]
+
+  return (
+    <div className="mobile-bottom-nav" style={{ background: bg, borderTop: `1px solid ${theme === 'dark' ? '#333' : '#e5e5e5'}` }}>
+      {links.map((link) => {
+        const active = location.pathname === link.path
+        const Icon = link.icon
+
+        return (
+          <Link key={link.path} to={link.path} style={{ color: active ? '#ff6b35' : text }}>
+            <span style={{ position: 'relative', display: 'inline-flex' }}>
+              <Icon />
+              {link.path === '/favorites' && favorites.length > 0 && (
+                <small>{favorites.length}</small>
+              )}
+            </span>
+            <span>{link.label}</span>
+          </Link>
+        )
+      })}
+    </div>
+  )
+}
+
 function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }) {
   const { theme } = useTheme()
   const { isAuthenticated, isAdmin } = useAuth()
   const { toggleFavorite, isFavorite } = useCars()
   const [imageUrl, setImageUrl] = useState(null)
   const [loading, setLoading] = useState(true)
-  
+
   const bg = theme === 'dark' ? '#1a1a2e' : '#ffffff'
   const text = theme === 'dark' ? '#ffffff' : '#1a1a2e'
-  const favorite = isFavorite(car.id)
-  
+  const carId = car._id || car.id
+  const favorite = isFavorite(carId)
+
   useEffect(() => {
     let isMounted = true
-    
+
     const loadImage = async () => {
       const url = await fetchCarImage(car.make, car.model, car.year)
       if (isMounted) {
@@ -593,28 +487,29 @@ function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }
         setLoading(false)
       }
     }
-    
+
     loadImage()
-    
-    return () => { isMounted = false }
+
+    return () => {
+      isMounted = false
+    }
   }, [car.make, car.model, car.year])
-  
+
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
       whileHover={{ y: -10 }}
       style={{ background: bg, borderRadius: '12px', overflow: 'hidden', boxShadow: '0 10px 40px rgba(0,0,0,0.1)', position: 'relative' }}
     >
-      {/* Favorite Button */}
       {isAuthenticated && !showActions && (
         <motion.button
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={(e) => {
             e.preventDefault()
-            toggleFavorite(car.id)
+            toggleFavorite(carId)
           }}
           style={{
             position: 'absolute',
@@ -636,23 +531,24 @@ function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }
           <FaHeart />
         </motion.button>
       )}
-      
-      {/* Admin Actions */}
+
       {showActions && isAdmin && (
-        <div style={{
-          position: 'absolute',
-          top: '10px',
-          right: '10px',
-          zIndex: 10,
-          display: 'flex',
-          gap: '0.5rem'
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 10,
+            display: 'flex',
+            gap: '0.5rem'
+          }}
+        >
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.preventDefault()
-              onToggleFeatured(car.id)
+              onToggleFeatured(carId, car.featured)
             }}
             style={{
               background: car.featured ? '#ffd700' : 'rgba(255,255,255,0.9)',
@@ -669,12 +565,13 @@ function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }
           >
             <FaStar />
           </motion.button>
+
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.preventDefault()
-              onDelete(car.id)
+              onDelete(carId)
             }}
             style={{
               background: '#dc3545',
@@ -693,20 +590,20 @@ function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }
           </motion.button>
         </div>
       )}
-      
-      <Link to={`/car/${car.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+
+      <Link to={`/car/${carId}`} style={{ textDecoration: 'none', color: 'inherit' }}>
         <div style={{ height: '220px', overflow: 'hidden', position: 'relative', background: car.color }}>
           {loading ? (
             <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: "linear" }}>
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
                 <FaCar style={{ fontSize: '2rem', opacity: 0.3 }} />
               </motion.div>
             </div>
           ) : imageUrl ? (
-            <motion.img 
+            <motion.img
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              src={imageUrl} 
+              src={imageUrl}
               alt={`${car.year} ${car.make} ${car.model}`}
               style={{ width: '100%', height: '100%', objectFit: 'cover' }}
             />
@@ -715,24 +612,26 @@ function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }
               <FaCar />
             </div>
           )}
-          
+
           {car.featured && (
-            <div style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              background: '#ff6b35',
-              color: 'white',
-              padding: '0.25rem 0.75rem',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: 'bold'
-            }}>
+            <div
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: showActions && isAdmin ? '90px' : '10px',
+                background: '#ff6b35',
+                color: 'white',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '20px',
+                fontSize: '0.75rem',
+                fontWeight: 'bold'
+              }}
+            >
               FEATURED
             </div>
           )}
         </div>
-        
+
         <div style={{ padding: '1.5rem' }}>
           <h3 style={{ color: text, marginBottom: '0.5rem' }}>{car.year} {car.make} {car.model}</h3>
           <p style={{ color: '#666', marginBottom: '1rem' }}>{car.trim}</p>
@@ -749,7 +648,6 @@ function CarCard({ car, index, showActions = false, onDelete, onToggleFeatured }
     </motion.div>
   )
 }
-
 // ==================== PAGES ====================
 
 function Home() {
@@ -771,10 +669,10 @@ function Home() {
       }}>
         <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }}>
           <motion.h1 initial={{ scale: 0.9 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem' }}>
-            FIND YOUR <span style={{ color: '#ff6b35' }}>PERFECT</span> DRIVE
+            PREMIUM CARS, <span style={{ color: '#ff6b35' }}>READY</span> TO DRIVE
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 0.8 }} transition={{ delay: 0.3 }} style={{ fontSize: '1.25rem', marginBottom: '2rem', maxWidth: '600px', margin: '0 auto 2rem' }}>
-            Premium vehicles. Transparent pricing. Unmatched service.
+            Browse inspected dealer inventory, request a viewing, or sell your car directly to us.
           </motion.p>
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }} style={{ display: 'flex', gap: '1rem', justifyContent: 'center', maxWidth: '600px', margin: '0 auto' }}>
             <input type="text" placeholder="Search cars..." style={{ flex: 1, padding: '1rem', borderRadius: '8px', border: 'none', fontSize: '1rem', boxShadow: '0 4px 20px rgba(0,0,0,0.1)' }} />
@@ -792,8 +690,8 @@ function Home() {
           <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} style={{ color: theme === 'dark' ? '#ffffff' : '#1a1a2e', textAlign: 'center', marginBottom: '3rem', fontSize: '2.5rem' }}>
             Featured Vehicles
           </motion.h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-            {featuredCars.map((car, index) => <CarCard key={car.id} car={car} index={index} />)}
+          <div className="mobile-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+            {featuredCars.map((car, index) => <CarCard key={car._id || car.id} car={car} index={index} />)}
           </div>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} style={{ textAlign: 'center', marginTop: '3rem' }}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
@@ -832,9 +730,9 @@ function Inventory() {
   const fuelTypes = ['all', ...new Set(cars.map(c => c.fuelType))]
   
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: theme === 'dark' ? '#ffffff' : '#1a1a2e', padding: '2rem' }}>
+    <motion.div className="mobile-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: theme === 'dark' ? '#ffffff' : '#1a1a2e', padding: '2rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
-        <h1 style={{ marginBottom: '2rem' }}>Browse Inventory ({filteredCars.length} cars)</h1>
+        <h1 style={{ marginBottom: '2rem' }}>Dealer Inventory ({filteredCars.length} cars)</h1>
         
         <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
           <div style={{ position: 'relative', flex: 1, minWidth: '250px' }}>
@@ -868,8 +766,8 @@ function Inventory() {
             <p>Try adjusting your search or filters</p>
           </motion.div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-            {filteredCars.map((car, index) => <CarCard key={car.id} car={car} index={index} />)}
+          <div className="mobile-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+            {filteredCars.map((car, index) => <CarCard key={car._id || car.id} car={car} index={index} />)}
           </div>
         )}
       </div>
@@ -883,7 +781,7 @@ function Favorites() {
   const favoriteCars = getFavoriteCars()
   
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: theme === 'dark' ? '#ffffff' : '#1a1a2e', padding: '2rem' }}>
+    <motion.div className="mobile-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: theme === 'dark' ? '#ffffff' : '#1a1a2e', padding: '2rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <h1 style={{ marginBottom: '2rem' }}>My Favorites ({favoriteCars.length})</h1>
         
@@ -897,8 +795,8 @@ function Favorites() {
             </Link>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
-            {favoriteCars.map((car, index) => <CarCard key={car.id} car={car} index={index} />)}
+          <div className="mobile-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+            {favoriteCars.map((car, index) => <CarCard key={car._id || car.id} car={car} index={index} />)}
           </div>
         )}
       </div>
@@ -914,7 +812,7 @@ function CarDetail() {
   const { id } = useParams()
   const { cars } = useCars()
   
-  const car = cars.find(c => c.id === parseInt(id))
+  const car = cars.find(c => (c._id || String(c.id)) === id)
   const [gallery, setGallery] = useState([])
   const [mainImage, setMainImage] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -922,7 +820,7 @@ function CarDetail() {
   const bg = theme === 'dark' ? '#0f0f1e' : '#f8f9fa'
   const text = theme === 'dark' ? '#ffffff' : '#1a1a2e'
   const cardBg = theme === 'dark' ? '#1a1a2e' : '#ffffff'
-  const favorite = car ? isFavorite(car.id) : false
+  const favorite = car ? isFavorite(car._id || car.id) : false
   
   useEffect(() => {
     if (!car) return
@@ -956,21 +854,21 @@ function CarDetail() {
   
   const handleBuy = () => {
     if (!isAuthenticated) {
-      toast.warning('Please login to purchase')
+      toast.warning('Please login to send an inquiry')
       navigate('/login')
     } else {
-      toast.success('Purchase initiated! Check your email for next steps.')
+      toast.success('Inquiry received. Our sales team will contact you shortly.')
     }
   }
   
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: bg, color: text, padding: '2rem' }}>
+    <motion.div className="mobile-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: bg, color: text, padding: '2rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <motion.button whileHover={{ x: -5 }} onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', color: '#ff6b35', cursor: 'pointer', marginBottom: '2rem', fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           ← Back
         </motion.button>
         
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '3rem' }}>
+        <div className="mobile-detail-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '3rem' }}>
           <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }}>
             <div style={{ height: '400px', borderRadius: '12px', overflow: 'hidden', marginBottom: '1rem', background: car.color }}>
               {loading ? (
@@ -1021,7 +919,7 @@ function CarDetail() {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  onClick={() => toggleFavorite(car.id)}
+                  onClick={() => toggleFavorite(car._id || car.id)}
                   style={{
                     background: favorite ? '#ff6b35' : cardBg,
                     border: '2px solid #ff6b35',
@@ -1045,7 +943,7 @@ function CarDetail() {
               ${car.price.toLocaleString()}
             </motion.p>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
+            <div className="mobile-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2rem' }}>
               {[
                 { label: 'Year', value: car.year },
                 { label: 'Mileage', value: `${car.mileage.toLocaleString()} mi` },
@@ -1071,9 +969,29 @@ function CarDetail() {
                 ))}
               </div>
             </div>
+
+            {(
+              <div style={{ background: cardBg, padding: '1.5rem', borderRadius: '12px', marginBottom: '2rem' }}>
+                <h3 style={{ marginBottom: '1rem' }}>Dealer Contact</h3>
+                <div style={{ display: 'grid', gap: '0.85rem', color: '#666' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <FaUser style={{ color: '#ff6b35' }} />
+                    <span>{DEALER.name}</span>
+                  </div>
+                  <a href={`tel:${DEALER.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#666', textDecoration: 'none' }}>
+                    <FaPhone style={{ color: '#ff6b35' }} />
+                    <span>{DEALER.phone}</span>
+                  </a>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <FaMapMarkerAlt style={{ color: '#ff6b35' }} />
+                    <span>{DEALER.location}</span>
+                  </div>
+                </div>
+              </div>
+            )}
             
             <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={handleBuy} style={{ background: '#ff6b35', color: 'white', padding: '1rem 2rem', borderRadius: '8px', border: 'none', fontSize: '1.1rem', cursor: 'pointer', width: '100%', marginBottom: '1rem' }}>
-              {isAuthenticated ? 'Buy Now' : 'Login to Buy'}
+              {isAuthenticated ? 'Request This Car' : 'Login to Inquire'}
             </motion.button>
           </motion.div>
         </div>
@@ -1103,7 +1021,7 @@ function Login() {
       <motion.div initial={{ y: 50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }} style={{ background: theme === 'dark' ? '#1a1a2e' : '#ffffff', padding: '3rem', borderRadius: '12px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
         <h1 style={{ textAlign: 'center', marginBottom: '2rem', color: theme === 'dark' ? '#ffffff' : '#1a1a2e' }}>Welcome Back</h1>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '1rem', fontSize: '0.9rem' }}>
-          Admin login: <code style={{ background: '#ff6b3520', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>admin@geargrid.com</code>
+          Admin login: <code style={{ background: '#ff6b3520', padding: '0.2rem 0.5rem', borderRadius: '4px' }}>Florexstudio.ng@gmail.com</code>
         </p>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div style={{ marginBottom: '1rem' }}>
@@ -1183,7 +1101,7 @@ function Dashboard() {
   ]
   
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: bg, color: text, padding: '2rem' }}>
+    <motion.div className="mobile-page" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: bg, color: text, padding: '2rem' }}>
       <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
         <motion.h1 initial={{ x: -20 }} animate={{ x: 0 }} style={{ marginBottom: '2rem' }}>
           Welcome, {user?.firstName}! 👋
@@ -1203,7 +1121,7 @@ function Dashboard() {
           <div style={{ marginBottom: '3rem' }}>
             <h2 style={{ marginBottom: '1.5rem' }}>Recently Favorited</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
-              {favoriteCars.slice(0, 3).map((car, index) => <CarCard key={car.id} car={car} index={index} />)}
+              {favoriteCars.slice(0, 3).map((car, index) => <CarCard key={car._id || car.id} car={car} index={index} />)}
             </div>
           </div>
         )}
@@ -1220,8 +1138,17 @@ function Dashboard() {
 
 function AdminDashboard() {
   const { theme } = useTheme()
-  const { cars, addCar, deleteCar, toggleFeatured } = useCars()
-  const { logout } = useAuth()
+  const {
+    cars,
+    pendingCars,
+    fetchPendingCars,
+    approveCar,
+    rejectCar,
+    addCar,
+    deleteCar,
+    toggleFeatured
+  } = useCars()
+  const { isAdmin, isLoading, logout } = useAuth()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('overview')
   const { register, handleSubmit, reset, formState: { errors } } = useForm()
@@ -1229,43 +1156,81 @@ function AdminDashboard() {
   const bg = theme === 'dark' ? '#0f0f1e' : '#f8f9fa'
   const text = theme === 'dark' ? '#ffffff' : '#1a1a2e'
   const cardBg = theme === 'dark' ? '#1a1a2e' : '#ffffff'
+
+  useEffect(() => {
+    if (isLoading) return
+
+    if (!isAdmin) {
+      navigate('/login')
+      return
+    }
+
+    const token = localStorage.getItem('gearGridToken')
+    if (token) {
+      fetchPendingCars(token)
+    }
+  }, [isAdmin, isLoading, navigate])
+
+  const handleApproveCar = (id) => {
+    const token = localStorage.getItem('gearGridToken')
+    approveCar(id, token)
+  }
+
+  const handleRejectCar = (id) => {
+    const token = localStorage.getItem('gearGridToken')
+    rejectCar(id, token)
+  }
+
+  const handleDeleteCar = (id) => {
+    const token = localStorage.getItem('gearGridToken')
+    deleteCar(id, token)
+  }
   
   // Calculate stats
   const totalCars = cars.length
   const totalValue = cars.reduce((sum, car) => sum + car.price, 0)
   const featuredCount = cars.filter(c => c.featured).length
-  const avgPrice = Math.round(totalValue / totalCars)
   
   const stats = [
     { icon: FaCar, label: 'Total Cars', value: totalCars, color: '#0066b1' },
     { icon: FaDollarSign, label: 'Total Value', value: `$${(totalValue / 1000000).toFixed(1)}M`, color: '#28a745' },
-    { icon: FaStar, label: 'Featured', value: featuredCount, color: '#ffd700' },
-    { icon: FaChartBar, label: 'Avg Price', value: `$${avgPrice.toLocaleString()}`, color: '#ff6b35' }
+    { icon: FaRegClock, label: 'Valuation Leads', value: pendingCars.length, color: '#ff6b35' },
+    { icon: FaStar, label: 'Featured', value: featuredCount, color: '#ffd700' }
   ]
   
-  const onAddCar = (data) => {
-    const newCar = {
-      ...data,
-      year: parseInt(data.year),
-      price: parseInt(data.price),
-      mileage: parseInt(data.mileage),
-      features: data.features.split(',').map(f => f.trim()),
-      color: '#666666'
-    }
-    addCar(newCar)
+  const onAddCar = async (data) => {
+  const token = localStorage.getItem('gearGridToken')
+
+  const newCar = {
+    ...data,
+    year: parseInt(data.year),
+    price: parseInt(data.price),
+    mileage: parseInt(data.mileage),
+    features: data.features.split(',').map(f => f.trim()),
+    color: '#666666',
+    sellerName: data.sellerName || DEALER.name,
+    sellerPhone: data.sellerPhone || DEALER.phone,
+    sellerLocation: data.sellerLocation || DEALER.location,
+    featured: false
+  }
+
+  const result = await addCar(newCar, token)
+
+  if (result.success) {
     reset()
     setActiveTab('inventory')
   }
+}
   
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: bg, color: text }}>
       {/* Admin Header */}
-      <div style={{ background: cardBg, padding: '1.5rem 2rem', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="admin-header" style={{ background: cardBg, padding: '1.5rem 2rem', borderBottom: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <FaCog style={{ fontSize: '1.5rem', color: '#ff6b35' }} />
-          <h1 style={{ margin: 0 }}>Admin Dashboard</h1>
+          <h1 style={{ margin: 0 }}>Dealer Admin</h1>
         </div>
-        <div style={{ display: 'flex', gap: '1rem' }}>
+        <div className="admin-tabs" style={{ display: 'flex', gap: '1rem' }}>
           <button 
             onClick={() => setActiveTab('overview')}
             style={{ 
@@ -1278,6 +1243,19 @@ function AdminDashboard() {
             }}
           >
             Overview
+          </button>
+          <button 
+            onClick={() => setActiveTab('pending')}
+            style={{ 
+              padding: '0.5rem 1rem', 
+              borderRadius: '6px', 
+              border: 'none',
+              background: activeTab === 'pending' ? '#ff6b35' : 'transparent',
+              color: activeTab === 'pending' ? 'white' : text,
+              cursor: 'pointer'
+            }}
+          >
+            Leads ({pendingCars.length})
           </button>
           <button 
             onClick={() => setActiveTab('inventory')}
@@ -1311,7 +1289,7 @@ function AdminDashboard() {
         </div>
       </div>
       
-      <div style={{ padding: '2rem' }}>
+      <div className="admin-content" style={{ padding: '2rem' }}>
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -1349,7 +1327,7 @@ function AdminDashboard() {
                   </thead>
                   <tbody>
                     {cars.slice(0, 5).map(car => (
-                      <tr key={car.id} style={{ borderBottom: '1px solid #222' }}>
+                      <tr key={car._id || car.id} style={{ borderBottom: '1px solid #222' }}>
                         <td style={{ padding: '1rem' }}>{car.make} {car.model}</td>
                         <td style={{ padding: '1rem' }}>{car.year}</td>
                         <td style={{ padding: '1rem', color: '#ff6b35' }}>${car.price.toLocaleString()}</td>
@@ -1369,20 +1347,85 @@ function AdminDashboard() {
           </motion.div>
         )}
         
+        {/* Sell-to-Us Leads Tab */}
+        {activeTab === 'pending' && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <h2 style={{ marginBottom: '1.5rem' }}>Sell-to-Us Leads ({pendingCars.length})</h2>
+
+            {pendingCars.length === 0 ? (
+              <div style={{ background: cardBg, padding: '3rem', borderRadius: '12px', textAlign: 'center', color: '#666' }}>
+                <FaRegClock style={{ fontSize: '3rem', color: '#ff6b35', marginBottom: '1rem', opacity: 0.6 }} />
+                <h3 style={{ color: text, marginBottom: '0.5rem' }}>No valuation leads</h3>
+                <p style={{ margin: 0 }}>Cars submitted through Sell to Us will appear here.</p>
+              </div>
+            ) : (
+              <div className="mobile-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1.5rem' }}>
+                {pendingCars.map((car, index) => {
+                  const carId = car._id || car.id
+
+                  return (
+                    <motion.div
+                      key={carId}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      style={{ background: cardBg, borderRadius: '12px', padding: '1.5rem', boxShadow: '0 8px 30px rgba(0,0,0,0.08)' }}
+                    >
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem', marginBottom: '1rem' }}>
+                        <div>
+                          <h3 style={{ margin: '0 0 0.35rem 0' }}>{car.year} {car.make} {car.model}</h3>
+                          <p style={{ margin: 0, color: '#666' }}>{car.trim || 'No trim listed'}</p>
+                        </div>
+                        <strong style={{ color: '#ff6b35', whiteSpace: 'nowrap' }}>${car.price.toLocaleString()}</strong>
+                      </div>
+
+                      <p style={{ color: '#666', lineHeight: 1.6, minHeight: '3rem' }}>{car.description || 'No description provided.'}</p>
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '0.65rem', margin: '1.25rem 0', color: '#666' }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaUser style={{ color: '#ff6b35' }} /> {car.sellerName}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaPhone style={{ color: '#ff6b35' }} /> {car.sellerPhone}</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FaMapMarkerAlt style={{ color: '#ff6b35' }} /> {car.sellerLocation}</span>
+                      </div>
+
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        <button onClick={() => handleApproveCar(carId)} style={{ flex: 1, minWidth: '130px', background: '#28a745', color: 'white', border: 'none', padding: '0.85rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                          Add to Inventory
+                        </button>
+                        <button onClick={() => handleRejectCar(carId)} style={{ flex: 1, minWidth: '130px', background: '#6c757d', color: 'white', border: 'none', padding: '0.85rem 1rem', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' }}>
+                          Decline
+                        </button>
+                        <button onClick={() => handleDeleteCar(carId)} style={{ width: '48px', background: '#dc3545', color: 'white', border: 'none', padding: '0.85rem', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <FaTrash />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
+          </motion.div>
+        )}
+
         {/* Inventory Tab */}
         {activeTab === 'inventory' && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <h2 style={{ marginBottom: '1.5rem' }}>Manage Inventory ({cars.length} cars)</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
+            <h2 style={{ marginBottom: '1.5rem' }}>Manage Dealer Inventory ({cars.length} cars)</h2>
+            <div className="mobile-card-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '2rem' }}>
               {cars.map((car, index) => (
-                <CarCard 
-                  key={car.id} 
-                  car={car} 
-                  index={index} 
-                  showActions={true}
-                  onDelete={deleteCar}
-                  onToggleFeatured={toggleFeatured}
-                />
+            <CarCard 
+  key={car._id || car.id}
+  car={car}
+  index={index}
+  showActions={true}
+  onDelete={(id) => {
+    const token = localStorage.getItem('gearGridToken')
+    deleteCar(id, token)
+  }}
+  onToggleFeatured={(id, currentFeatured) => {
+    const token = localStorage.getItem('gearGridToken')
+    toggleFeatured(id, currentFeatured, token)
+  }}
+/>
               ))}
             </div>
           </motion.div>
@@ -1394,7 +1437,7 @@ function AdminDashboard() {
             <h2 style={{ marginBottom: '1.5rem' }}>Add New Car</h2>
             <div style={{ background: cardBg, padding: '2rem', borderRadius: '12px' }}>
               <form onSubmit={handleSubmit(onAddCar)}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="mobile-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', color: '#666' }}>Make</label>
                     <input {...register('make', { required: true })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
@@ -1405,7 +1448,7 @@ function AdminDashboard() {
                   </div>
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="mobile-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', color: '#666' }}>Year</label>
                     <input type="number" {...register('year', { required: true })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
@@ -1420,7 +1463,7 @@ function AdminDashboard() {
                   </div>
                 </div>
                 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
+                <div className="mobile-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '1rem' }}>
                   <div>
                     <label style={{ display: 'block', marginBottom: '0.5rem', color: '#666' }}>Fuel Type</label>
                     <select {...register('fuelType', { required: true })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }}>
@@ -1469,30 +1512,329 @@ function AdminDashboard() {
 
 function SellCar() {
   const { theme } = useTheme()
-  const { register, handleSubmit, formState: { errors }, reset } = useForm()
-  
-  const onSubmit = (data) => {
-    toast.success('Car listed successfully!')
-    reset()
+  const { addCar } = useCars()
+  const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors }
+  } = useForm()
+
+  const onSubmit = async (data) => {
+    if (!isAuthenticated) {
+      toast.warning('Please sign in first')
+      navigate('/login')
+      return
+    }
+
+    const token = localStorage.getItem('gearGridToken')
+
+  const newCar = {
+  make: data.make,
+  model: data.model,
+  year: parseInt(data.year),
+  trim: data.trim,
+  price: parseInt(data.price),
+  mileage: parseInt(data.mileage),
+  fuelType: data.fuelType,
+  transmission: data.transmission,
+  color: data.color || '#666666',
+  featured: false,
+  description: data.description,
+  features: data.features ? data.features.split(',').map(f => f.trim()) : [],
+  sellerName: data.sellerName,
+  sellerPhone: data.sellerPhone,
+  sellerLocation: data.sellerLocation,
+  status: 'pending',
+}
+
+    const result = await addCar(newCar, token)
+
+    if (result.success) {
+      reset()
+      navigate('/')
+    }
   }
-  
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ minHeight: 'calc(100vh - 80px)', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: theme === 'dark' ? '#ffffff' : '#1a1a2e', padding: '2rem' }}>
+    <motion.div
+      className="mobile-page"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      style={{
+        minHeight: 'calc(100vh - 80px)',
+        background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+        color: theme === 'dark' ? '#ffffff' : '#1a1a2e',
+        padding: '2rem'
+      }}
+    >
       <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <h1 style={{ textAlign: 'center', marginBottom: '2rem' }}>Sell Your Car</h1>
-        <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} style={{ background: theme === 'dark' ? '#1a1a2e' : '#ffffff', padding: '3rem', borderRadius: '12px', boxShadow: '0 10px 40px rgba(0,0,0,0.1)' }}>
+        <h1 style={{ textAlign: 'center', marginBottom: '0.75rem' }}>Sell Your Car to Us</h1>
+        <p style={{ textAlign: 'center', color: '#666', marginBottom: '2rem' }}>
+          Share your vehicle details and our team will review it for a direct purchase or trade-in offer.
+        </p>
+
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          style={{
+            background: theme === 'dark' ? '#1a1a2e' : '#ffffff',
+            padding: '3rem',
+            borderRadius: '12px',
+            boxShadow: '0 10px 40px rgba(0,0,0,0.1)'
+          }}
+        >
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-              <input type="text" placeholder="Make" {...register('make', { required: true })} style={{ padding: '1rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
-              <input type="text" placeholder="Model" {...register('model', { required: true })} style={{ padding: '1rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
+<div
+  className="mobile-form-grid"
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '1rem',
+    marginBottom: '1rem'
+  }}
+>
+  <input
+    type="text"
+    placeholder="Your Name"
+    {...register('sellerName', { required: true })}
+    style={{
+      padding: '1rem',
+      borderRadius: '8px',
+      border: '2px solid #e0e0e0',
+      background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+      color: 'inherit'
+    }}
+  />
+  <input
+    type="text"
+    placeholder="Phone Number"
+    {...register('sellerPhone', { required: true })}
+    style={{
+      padding: '1rem',
+      borderRadius: '8px',
+      border: '2px solid #e0e0e0',
+      background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+      color: 'inherit'
+    }}
+  />
+  <input
+    type="text"
+    placeholder="Your Location"
+    {...register('sellerLocation', { required: true })}
+    style={{
+      padding: '1rem',
+      borderRadius: '8px',
+      border: '2px solid #e0e0e0',
+      background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+      color: 'inherit'
+    }}
+  />
+</div>
+
+<div
+  className="mobile-form-grid"
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '1rem',
+    marginBottom: '1rem'
+  }}
+>
+  <input
+    type="text"
+    placeholder="Make"
+    {...register('make', { required: true })}
+    style={{
+      padding: '1rem',
+      borderRadius: '8px',
+      border: '2px solid #e0e0e0',
+      background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+      color: 'inherit'
+    }}
+  />
+  <input
+    type="text"
+    placeholder="Model"
+    {...register('model', { required: true })}
+    style={{
+      padding: '1rem',
+      borderRadius: '8px',
+      border: '2px solid #e0e0e0',
+      background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+      color: 'inherit'
+    }}
+  />
+</div>
+
+            <div
+              className="mobile-form-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '1rem',
+                marginBottom: '1rem'
+              }}
+            >
+              <input
+                type="number"
+                placeholder="Year"
+                {...register('year', { required: true })}
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Trim"
+                {...register('trim', { required: true })}
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
+              <input
+                type="number"
+                placeholder="Expected Price"
+                {...register('price', { required: true })}
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-              <input type="number" placeholder="Year" {...register('year', { required: true })} style={{ padding: '1rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
-              <input type="number" placeholder="Price" {...register('price', { required: true })} style={{ padding: '1rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
+
+            <div
+              className="mobile-form-grid"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '1rem',
+                marginBottom: '1rem'
+              }}
+            >
+              <input
+                type="number"
+                placeholder="Mileage"
+                {...register('mileage', { required: true })}
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
+              <select
+                {...register('fuelType', { required: true })}
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              >
+                <option value="Gasoline">Gasoline</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Diesel">Diesel</option>
+              </select>
+              <select
+                {...register('transmission', { required: true })}
+                style={{
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              >
+                <option value="Automatic">Automatic</option>
+                <option value="Manual">Manual</option>
+                <option value="PDK">PDK</option>
+              </select>
             </div>
-            <textarea placeholder="Description" rows="4" {...register('description', { required: true })} style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit', marginBottom: '1rem' }}></textarea>
-            <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" style={{ width: '100%', padding: '1rem', background: '#ff6b35', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', cursor: 'pointer' }}>
-              List My Car
+
+            <div style={{ marginBottom: '1rem' }}>
+              <input
+                type="text"
+                placeholder="Color hex code, e.g. #111827"
+                {...register('color')}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '1rem' }}>
+              <textarea
+                placeholder="Condition, service history, and anything we should know"
+                rows="4"
+                {...register('description', { required: true })}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <input
+                type="text"
+                placeholder="Features separated by commas, e.g. Leather Seats, Reverse Camera"
+                {...register('features')}
+                style={{
+                  width: '100%',
+                  padding: '1rem',
+                  borderRadius: '8px',
+                  border: '2px solid #e0e0e0',
+                  background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa',
+                  color: 'inherit'
+                }}
+              />
+            </div>
+
+            
+
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit"
+              style={{
+                width: '100%',
+                padding: '1rem',
+                background: '#ff6b35',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                cursor: 'pointer'
+              }}
+            >
+              Request Valuation
             </motion.button>
           </form>
         </motion.div>
@@ -1536,7 +1878,7 @@ function About() {
             About <span style={{ color: '#ff6b35' }}>GEAR-GRID</span>
           </h1>
           <p style={{ maxWidth: '700px', margin: '0 auto', lineHeight: 1.8, fontSize: '1.2rem', opacity: 0.8 }}>
-            Revolutionizing the way people buy and sell premium vehicles. Founded in 2020, we've grown from a small startup to the most trusted name in luxury automotive marketplace.
+            A focused automotive business helping buyers find inspected vehicles and helping owners sell their cars directly without stress.
           </p>
         </motion.div>
       </section>
@@ -1560,7 +1902,7 @@ function About() {
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }}>
             <h2 style={{ fontSize: '2.5rem', marginBottom: '1.5rem' }}>Our Mission</h2>
             <p style={{ fontSize: '1.2rem', lineHeight: 1.8, opacity: 0.9 }}>
-              At GEAR-GRID, we believe that buying or selling a premium vehicle should be an exciting experience, not a stressful one. Our mission is to create the most trusted, transparent, and efficient marketplace for automotive enthusiasts.
+              At GEAR-GRID, we believe buying or selling a vehicle should be clear, fast, and personal. Our mission is to provide quality inventory, honest pricing, and responsive support for every customer.
             </p>
           </motion.div>
         </div>
@@ -1625,6 +1967,7 @@ function App() {
               </Routes>
             </main>
             <Footer />
+            <MobileBottomNav />
           </div>
           <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="colored" />
         </CarsProvider>

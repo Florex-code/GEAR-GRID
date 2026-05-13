@@ -1,27 +1,28 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react'
 
-const ThemeContext = createContext();
+const ThemeContext = createContext()
 
-export const ThemeProvider = ({ children }) => {
+export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('gearGridTheme');
-    return saved || 'dark';
-  });
+    return localStorage.getItem('theme') || 'dark'
+  })
 
   useEffect(() => {
-    localStorage.setItem('gearGridTheme', theme);
-    document.documentElement.setAttribute('data-theme', theme);
-  }, [theme]);
+    localStorage.setItem('theme', theme)
+    document.documentElement.setAttribute('data-theme', theme)
+  }, [theme])
 
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
-  };
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
+  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
-  );
-};
+  )
+}
 
-export const useTheme = () => useContext(ThemeContext);
+export function useTheme() {
+  return useContext(ThemeContext)
+}

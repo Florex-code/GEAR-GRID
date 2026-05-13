@@ -11,8 +11,16 @@ export const cars = [
     transmission: 'Automatic',
     color: '#0066b1',
     featured: true,
-    description: 'Immaculate condition BMW M3 Competition with all options. Ceramic brakes, carbon fiber trim, executive package.',
-    features: ['Carbon Ceramic Brakes', 'Executive Package', 'Carbon Fiber Trim', 'Harmon Kardon Sound', 'Heads Up Display', 'Wireless Charging']
+    description:
+      'Immaculate condition BMW M3 Competition with all options. Ceramic brakes, carbon fiber trim, executive package.',
+    features: [
+      'Carbon Ceramic Brakes',
+      'Executive Package',
+      'Carbon Fiber Trim',
+      'Harmon Kardon Sound',
+      'Heads Up Display',
+      'Wireless Charging',
+    ],
   },
   {
     id: 2,
@@ -26,8 +34,16 @@ export const cars = [
     transmission: 'PDK',
     color: '#c41230',
     featured: true,
-    description: 'Stunning 911 Carrera S with Sport Package. One owner, all service records, pristine condition.',
-    features: ['Sport Package', 'Sport Exhaust', 'Power Steering Plus', '20/21" Wheels', 'BOSE Audio', 'Lane Change Assist']
+    description:
+      'Stunning 911 Carrera S with Sport Package. One owner, all service records, pristine condition.',
+    features: [
+      'Sport Package',
+      'Sport Exhaust',
+      'Power Steering Plus',
+      '20/21" Wheels',
+      'BOSE Audio',
+      'Lane Change Assist',
+    ],
   },
   {
     id: 3,
@@ -41,8 +57,15 @@ export const cars = [
     transmission: 'Automatic',
     color: '#f4f4f4',
     featured: true,
-    description: 'Tesla Model S Plaid with Full Self Driving. Acceleration that will take your breath away.',
-    features: ['Full Self Driving', '21" Arachnid Wheels', 'Yoke Steering', 'Premium Audio', 'Tri-Motor AWD']
+    description:
+      'Tesla Model S Plaid with Full Self Driving. Acceleration that will take your breath away.',
+    features: [
+      'Full Self Driving',
+      '21" Arachnid Wheels',
+      'Yoke Steering',
+      'Premium Audio',
+      'Tri-Motor AWD',
+    ],
   },
   {
     id: 4,
@@ -56,8 +79,14 @@ export const cars = [
     transmission: '9G-TRONIC',
     color: '#1a1a1a',
     featured: false,
-    description: 'The pinnacle of luxury. S-Class with every available option including rear executive seating.',
-    features: ['Executive Rear Seating', 'Burmester 4D Audio', 'AR Head-Up Display', 'E-Active Body Control']
+    description:
+      'The pinnacle of luxury. S-Class with every available option including rear executive seating.',
+    features: [
+      'Executive Rear Seating',
+      'Burmester 4D Audio',
+      'AR Head-Up Display',
+      'E-Active Body Control',
+    ],
   },
   {
     id: 5,
@@ -71,8 +100,15 @@ export const cars = [
     transmission: 'S tronic',
     color: '#ffea00',
     featured: true,
-    description: 'Final year R8 V10 Performance. Carbon fiber everywhere, dynamic steering, B&O audio.',
-    features: ['Carbon Fiber Engine Bay', 'Laser Headlights', 'B&O 3D Audio', 'Dynamic Steering', 'Carbon Ceramic Brakes']
+    description:
+      'Final year R8 V10 Performance. Carbon fiber everywhere, dynamic steering, B&O audio.',
+    features: [
+      'Carbon Fiber Engine Bay',
+      'Laser Headlights',
+      'B&O 3D Audio',
+      'Dynamic Steering',
+      'Carbon Ceramic Brakes',
+    ],
   },
   {
     id: 6,
@@ -86,10 +122,19 @@ export const cars = [
     transmission: '10-Speed Auto',
     color: '#001f3f',
     featured: false,
-    description: 'Limited Inspiration Series LC 500. Stunning blue paintwork, white interior, Mark Levinson audio.',
-    features: ['Mark Levinson Audio', 'Limited Edition Paint', 'Alcantara Headliner', 'Carbon Fiber Roof']
-  }
-]
+    description:
+      'Limited Inspiration Series LC 500. Stunning blue paintwork, white interior, Mark Levinson audio.',
+    features: [
+      'Mark Levinson Audio',
+      'Limited Edition Paint',
+      'Alcantara Headliner',
+      'Carbon Fiber Roof',
+    ],
+  },
+];
 
-export const getCarById = (id) => cars.find(car => car.id === parseInt(id))
-export const getFeaturedCars = () => cars.filter(car => car.featured)
+export const getCarById = (id) =>
+  cars.find((car) => car.id === Number(id));
+
+export const getFeaturedCars = () =>
+  cars.filter((car) => car.featured);
