@@ -14,7 +14,7 @@ import {
   FaPhone, FaMapMarkerAlt, FaShieldAlt, FaAward, FaUsers,
   FaHandshake, FaStar, FaRegClock, FaHeadset, FaTrash,
   FaEdit, FaPlus, FaChartBar, FaDollarSign, FaEye,
-  FaSignOutAlt, FaCog, FaBell
+  FaEyeSlash, FaSignOutAlt, FaCog, FaBell
 } from 'react-icons/fa'
 
 // ==================== IMAGE API SERVICE ====================
@@ -1015,6 +1015,7 @@ function Login() {
   const { theme } = useTheme()
   const { login } = useAuth()
   const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm()
   
   const onSubmit = (data) => {
@@ -1040,7 +1041,17 @@ function Login() {
             {errors.email && <span style={{ color: '#ff6b35', fontSize: '0.85rem' }}>{errors.email.message}</span>}
           </div>
           <div style={{ marginBottom: '1.5rem' }}>
-            <input type="password" placeholder="Password" {...register('password', { required: 'Password is required' })} style={{ width: '100%', padding: '1rem', borderRadius: '8px', border: errors.password ? '2px solid #ff6b35' : '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
+            <div style={{ position: 'relative' }}>
+              <input type={showPassword ? 'text' : 'password'} placeholder="Password" {...register('password', { required: 'Password is required' })} style={{ width: '100%', padding: '1rem 3rem 1rem 1rem', borderRadius: '8px', border: errors.password ? '2px solid #ff6b35' : '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
+              <button
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword(prev => !prev)}
+                style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: '#ff6b35', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px' }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
             {errors.password && <span style={{ color: '#ff6b35', fontSize: '0.85rem' }}>{errors.password.message}</span>}
           </div>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" style={{ width: '100%', padding: '1rem', background: '#ff6b35', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>
@@ -1059,6 +1070,7 @@ function Register() {
   const { theme } = useTheme()
   const { register: authRegister } = useAuth()
   const navigate = useNavigate()
+  const [showPassword, setShowPassword] = useState(false)
   const { register, handleSubmit, formState: { errors } } = useForm()
   
   const onSubmit = (data) => {
@@ -1079,7 +1091,18 @@ function Register() {
             <input type="email" placeholder="Email" {...register('email', { required: 'Email is required' })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
           </div>
           <div style={{ marginBottom: '1.5rem' }}>
-            <input type="password" placeholder="Password" {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } })} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
+            <div style={{ position: 'relative' }}>
+              <input type={showPassword ? 'text' : 'password'} placeholder="Password" {...register('password', { required: 'Password is required', minLength: { value: 6, message: 'Min 6 characters' } })} style={{ width: '100%', padding: '0.75rem 3rem 0.75rem 0.75rem', borderRadius: '8px', border: errors.password ? '2px solid #ff6b35' : '2px solid #e0e0e0', background: theme === 'dark' ? '#0f0f1e' : '#f8f9fa', color: 'inherit' }} />
+              <button
+                type="button"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowPassword(prev => !prev)}
+                style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: '#ff6b35', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px' }}
+              >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+              </button>
+            </div>
+            {errors.password && <span style={{ color: '#ff6b35', fontSize: '0.85rem' }}>{errors.password.message}</span>}
           </div>
           <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} type="submit" style={{ width: '100%', padding: '1rem', background: '#ff6b35', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer' }}>
             Create Account
