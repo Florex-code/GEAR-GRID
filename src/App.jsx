@@ -1433,7 +1433,12 @@ function AdminDashboard() {
         
         {/* Add Car Tab */}
         {activeTab === 'add' && (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} style={{ maxWidth: '800px' }}>
+          <motion.div
+            className="admin-form-panel"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            style={{ maxWidth: '1100px', margin: '0 auto' }}
+          >
             <h2 style={{ marginBottom: '1.5rem' }}>Add New Car</h2>
             <div style={{ background: cardBg, padding: '2rem', borderRadius: '12px' }}>
               <form onSubmit={handleSubmit(onAddCar)}>
