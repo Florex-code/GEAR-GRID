@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import { cars as fallbackCars } from '../data/cars'
 
 const CarsContext = createContext()
 
@@ -35,6 +36,7 @@ export function CarsProvider({ children }) {
       setCars(data)
     } catch (error) {
       console.error(error)
+      setCars(fallbackCars)
       setCarsError(error.message)
     } finally {
       setCarsLoading(false)
