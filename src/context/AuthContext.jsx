@@ -4,9 +4,26 @@ import { toast } from 'react-toastify';
 
 export const AuthContext = createContext();
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
 const ADMIN_EMAIL = 'florexstudio.ng@gmail.com';
 const isAdminEmail = (email) => email?.toLowerCase() === ADMIN_EMAIL;
+
+const parseApiResponse = async (response) => {
+  const contentType = response.headers.get('content-type') || '';
+
+  if (contentType.includes('application/json')) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  throw new Error(
+    text.trim().startsWith('<')
+      ? 'API route returned the website instead of JSON'
+      : text || 'Invalid API response'
+  );
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -54,7 +71,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify({ email, password }),
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse(response);
 
       if (!response.ok) {
         throw new Error(data.message || 'Login failed');
@@ -90,7 +107,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const data = await parseApiResponse(response);
 
       if (!response.ok) {
         throw new Error(data.message || 'Registration failed');
@@ -141,7 +158,7 @@ export const AuthProvider = ({ children }) => {
         body: JSON.stringify(updates),
       });
 
-      const updatedUser = await response.json();
+      const updatedUser = await parseApiResponse(response);
 
       if (!response.ok) {
         throw new Error(updatedUser.message || 'Failed to update profile');
