@@ -8,6 +8,21 @@ const API_URL =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api')
 
+const parseApiResponse = async (response) => {
+  const contentType = response.headers.get('content-type') || ''
+
+  if (contentType.includes('application/json')) {
+    return response.json()
+  }
+
+  const text = await response.text()
+  throw new Error(
+    text.trim().startsWith('<')
+      ? 'API route returned the website instead of JSON'
+      : text || 'Invalid API response'
+  )
+}
+
 export function CarsProvider({ children }) {
   const [cars, setCars] = useState([])
   const [pendingCars, setPendingCars] = useState([])
@@ -29,7 +44,7 @@ export function CarsProvider({ children }) {
       setCarsError(null)
 
       const response = await fetch(`${API_URL}/cars`)
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch cars')
@@ -53,7 +68,7 @@ export function CarsProvider({ children }) {
         },
       })
 
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to fetch pending cars')
@@ -82,7 +97,7 @@ export function CarsProvider({ children }) {
         body: JSON.stringify(newCar),
       })
 
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to add car')
@@ -105,7 +120,7 @@ export function CarsProvider({ children }) {
         },
       })
 
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to approve car')
@@ -131,7 +146,7 @@ export function CarsProvider({ children }) {
         },
       })
 
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok) {
         throw new Error(data.message || 'Failed to reject car')
