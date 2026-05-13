@@ -1,6 +1,26 @@
 {
   "rewrites": [
     {
+      "source": "/api",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/api/cars",
+      "destination": "/api/cars.js"
+    },
+    {
+      "source": "/api/cars/(.*)",
+      "destination": "/api/cars/[...path].js"
+    },
+    {
+      "source": "/api/auth",
+      "destination": "/api/auth.js"
+    },
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth/[...path].js"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
