@@ -427,7 +427,7 @@ function Footer() {
 }
 
 function MobileBottomNav() {
-  const { theme } = useTheme()
+  const { theme, toggleTheme } = useTheme()
   const { isAuthenticated, isAdmin } = useAuth()
   const { favorites } = useCars()
   const location = useLocation()
@@ -438,6 +438,7 @@ function MobileBottomNav() {
     { path: '/', label: 'Home', icon: FaCar },
     { path: '/inventory', label: 'Inventory', icon: FaSearch },
     { path: '/sell', label: 'Sell', icon: FaPlus },
+    { path: '/theme', label: theme === 'dark' ? 'Light' : 'Dark', icon: theme === 'dark' ? FaSun : FaMoon, action: toggleTheme },
     isAdmin
       ? { path: '/admin', label: 'Admin', icon: FaCog }
       : { path: isAuthenticated ? '/favorites' : '/login', label: isAuthenticated ? 'Saved' : 'Login', icon: isAuthenticated ? FaHeart : FaUser },
@@ -450,7 +451,17 @@ function MobileBottomNav() {
         const Icon = link.icon
 
         return (
-          <Link key={link.path} to={link.path} style={{ color: active ? '#ff6b35' : text }}>
+          <Link
+            key={link.path}
+            to={link.action ? location.pathname : link.path}
+            onClick={(event) => {
+              if (link.action) {
+                event.preventDefault()
+                link.action()
+              }
+            }}
+            style={{ color: active ? '#ff6b35' : text }}
+          >
             <span style={{ position: 'relative', display: 'inline-flex' }}>
               <Icon />
               {link.path === '/favorites' && favorites.length > 0 && (
