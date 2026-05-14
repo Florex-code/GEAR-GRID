@@ -669,16 +669,49 @@ function Home() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
       <section style={{
+        position: 'relative',
         minHeight: '90vh',
         background: theme === 'dark' ? 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)' : 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
-        color: theme === 'dark' ? '#ffffff' : '#1a1a2e',
+        color: '#ffffff',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         textAlign: 'center',
-        padding: '2rem'
+        padding: '2rem',
+        overflow: 'hidden'
       }}>
-        <motion.div initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }}>
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          aria-hidden="true"
+          style={{
+            position: 'absolute',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'center',
+            zIndex: 0
+          }}
+        >
+          <source src="/videos/gear-grid-hero.mp4" type="video/mp4" />
+        </video>
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background: 'linear-gradient(90deg, rgba(15,15,30,0.92) 0%, rgba(15,15,30,0.76) 48%, rgba(15,15,30,0.48) 100%), linear-gradient(180deg, rgba(15,15,30,0.28) 0%, rgba(15,15,30,0.82) 100%)',
+            zIndex: 1
+          }}
+        />
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          style={{ position: 'relative', zIndex: 2 }}
+        >
           <motion.h1 initial={{ scale: 0.9 }} animate={{ scale: 1 }} transition={{ duration: 0.5 }} style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '1rem' }}>
             PREMIUM CARS, <span style={{ color: '#ff6b35' }}>READY</span> TO DRIVE
           </motion.h1>
