@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+import { Navigation, Pagination } from 'swiper/modules';
 import { 
   FaSearch, 
   FaCar, 
@@ -15,9 +15,9 @@ import {
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import 'swiper/css/effect-fade';
 import CarCard from '../components/CarCard';
 import { cars } from '../data/cars';
+import heroPoster from '../assets/hero.png';
 
 const features = [
   {
@@ -89,23 +89,17 @@ const Home = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-background">
-          <Swiper
-            modules={[Autoplay, EffectFade]}
-            effect="fade"
-            autoplay={{ delay: 5000, disableOnInteraction: false }}
-            loop={true}
-            className="hero-swiper"
+          <video
+            className="hero-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={heroPoster}
+            aria-hidden="true"
           >
-            <SwiperSlide>
-              <div className="hero-slide" style={{backgroundImage: 'url(/images/hero/hero-1.jpg)'}} />
-            </SwiperSlide>
-            <SwiperSlide>
-              <div className="hero-slide" style={{backgroundImage: 'url(/images/hero/hero-2.jpg)'}} />
-            </SwiperSlide>
-            <SwiperSlide>
-              <div className="hero-slide" style={{backgroundImage: 'url(/images/hero/hero-3.jpg)'}} />
-            </SwiperSlide>
-          </Swiper>
+            <source src="/videos/gear-grid-hero.mp4" type="video/mp4" />
+          </video>
           <div className="hero-overlay" />
         </div>
 
